@@ -1,0 +1,98 @@
+# MGT
+//瀑布流---等宽不等高或者等高不等宽
+window.onload=function(){
+	waterfall("main","box");
+    var dataInt={
+        "data":[
+        {"src":"0"},{"src":"1"},{"src":"2"},{"src":"3"}
+        ]
+    }
+    //拖动滚动条实现加载瀑布流图片
+    window.onscroll=function(){
+        //如果函数的返回值为真，就执行if的语句
+        if (checkScrollSlide) {
+            var oParent=document.getElementById("main");
+         //将数据块渲染到页面的尾部
+         for (var i = 0; i < dataInt.data.length; i++) {
+            //创建div元素节点
+             var oBox=document.createElement("div");
+             oBox.className="box";
+              //appendChild把一个元素添加到父元素最后面
+             oParent.appendChild(oBox);
+             var oPic=document.createElement("div");
+             oPic.className="pic";
+             oBox.appendChild(oPic);
+             var oImg=document.createElement("img");
+             oImg.src="image/"+dataInt.data[i].src+".jpg";
+             oPic.appendChild(oImg);
+          }
+          waterfall("main","box"); 
+        }
+    }
+}
+function waterfall(parent,box){
+	//将main下的所有class为box的元素取出来
+	var oParent=document.getElementById(parent);
+	var oBoxs=getByClass(oParent,box);
+    //console.log(oBoxs.length);
+    //计算页面的显示了几列box(页面宽/box宽)
+    var oBoxW=oBoxs[0].offsetWidth;//获取box元素的宽度
+    //console.log(oBoxW);
+    //获取浏览器窗口的宽度,求列数；并且向下取整
+    var windowWidth=document.body.clientWidth||document.documentElement.clientWidth;
+    var cols=Math.floor(windowWidth/oBoxW);
+   //console.log(cols);
+    //设置mian的宽度;
+    oParent.style.cssText="width:"+oBoxW*cols+"px;"
+    var hArr=[];//存放每一列高度的数组;
+    for (var i = 0;i<oBoxs.length;i++) {
+        if(i<cols){//oBoxs[i].offsetHeight获取元素距离父元素的高度
+         hArr.push(oBoxs[i].offsetHeight);
+        }else{
+            //apply()是用来改变函数或者方法中的this指向;
+            //Math.min(90,80,70)求最小的数值；求数组中的最小用Math.min.apply(hArr);
+            var minH=Math.min.apply(null,hArr);//求得hArr中最小的数值
+            var index=getMinHIndex(hArr,minH);
+            oBoxs[i].style.position="absolute";
+            oBoxs[i].style.top=minH+"px";
+            //oBoxs[i].style.left=oBoxW*index+"px";
+            oBoxs[i].style.left=oBoxs[index].offsetLeft+"px";
+            hArr[index] +=oBoxs[index].offsetHeight;
+        }
+    }
+
+
+}
+//构造函数求索引值
+  function getMinHIndex(arr,val){
+    for(var i in arr){
+     if(arr[i]==val){
+       return i;
+     }
+  }
+}
+//构造函数根据Class获取元素
+function getByClass(parent,className){
+var boxArr=new Array();//用来存储获取到的所有的class为box的元素数组形式
+oElements=parent.getElementsByTagName('*');
+for (var i = 0; i < oElements.length; i++) {
+	if(oElements[i].className==className){
+		boxArr.push(oElements[i]);
+	}
+}
+return boxArr;
+}
+
+//封装函数,检测是否具备了滚动条加载数据块的条件;
+function checkScrollSlide() {
+   var oParent=document.getElementById('main');
+   var oBoxs=getByClass(oParent,"box");//找到所有的box
+   var lastBoxH=oBoxs[oBoxs.length-1].offsetTop
+   +Math.floor(oBoxs[oBoxs.length-1].offsetHeight/2);
+   //浏览器兼容,获取滚动条滚动的距离,混杂模式下的滚动距离为document.body.scrollTop
+   //标准模式下的滚动距离为document.documentElement.scrollTop；
+   var scrollTop=document.body.scrollTop||document.documentElement.scrollTop;
+  //浏览器兼容,获取浏览器窗口的高度;
+   var windowHeight=document.body.clientHeight||document.documentElement.clientHeight; 
+   return (lastBoxH<scrollTop+windowHeight)?true:false;
+}
