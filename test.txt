@@ -1,0 +1,46 @@
+$(document).ready( function () {
+   var btn= $("#returnTop");
+   var timer = null;
+   // 定时器
+   btn.on("click",function(){
+      timer=setInterval(function(){
+         var top = $(document).scrollTop();
+         // alert(top);
+         console.log(document.body.scrollTop);
+         var speed = top/5;
+         document.body.scrollTop=top-speed;
+         if(document.body.scrollTop==0){
+          clearInterval(timer);
+         };
+      },30);  
+   });
+   $(window).scroll( function() {
+      var menus = $(".menus");
+      var content = $(".content");
+      var items = content.find(".item");
+      // console.log(items);
+      var top = $(document).scrollTop();
+      // console.log(top);
+      if(top<2520){
+        btn.css("display","none");
+      }else{
+        btn.css("display","block");
+      }
+      // 当前的ID
+      var currentId =" ";
+      items.each( function() {  
+      	 var that = $(this);
+         // console.log(this);
+         if(top > that.offset().top -300) {
+           currentId ="#" + that.attr("id");  
+          }else{
+             return false;
+       }
+      });   
+      var currentLink = menus.find(".focus-on");
+      if(currentId && currentLink.attr("href") != currentId) {
+      	currentLink.removeClass("focus-on");
+      	menus.find("[href="+currentId+"]").addClass("focus-on");
+      };
+   });
+});
